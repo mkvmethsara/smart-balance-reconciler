@@ -4,7 +4,7 @@
   "description": "Personal finance ledger and balance reconciler",
   "main": "main.js",
   "author": "Smart Balance Reconciler",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "start": "electron .",
