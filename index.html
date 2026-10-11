@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#071018">
+    <meta name="description" content="Track expenses, income, and reconcile your bank and wallet balance.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <title>Smart Balance Reconciler</title>
+</head>
+
+<body>
+    <main class="app-shell">
+        <header class="app-header">
+            <div>
+                <p class="eyebrow">PERSONAL FINANCE / LIVE LEDGER</p>
+                <h1>Smart Balance <span>Reconciler</span></h1>
+            </div>
+            <div class="header-mark" aria-hidden="true">SB<span>/</span>01</div>
+        </header>
+
+        <section class="dashboard-grid" aria-label="Balance overview">
+            <article class="card balance-card">
+                <div class="card-heading"><span>01 / App balance</span><span class="live-dot">LIVE</span></div>
+                <p class="balance-label">Calculated from your ledger</p>
+                <output id="appBalanceText" class="balance-value" aria-live="polite">LKR 0.00</output>
+                <div class="balance-breakdown">
+                    <span>Income <strong id="incomeTotal">LKR 0.00</strong></span>
+                    <span>Expenses <strong id="expenseTotal">LKR 0.00</strong></span>
+                </div>
+                <div class="credit-breakdown">
+                    <span>You owe <strong id="borrowedTotal">LKR 0.00</strong></span>
+                    <span>Owed to you <strong id="lentTotal">LKR 0.00</strong></span>
+                </div>
+                <p class="balance-hint">Borrowed money adds to cash; lent money is expected back.</p>
+            </article>
+
+            <article class="card reconcile-card">
+                <div class="card-heading"><span>02 / Reconcile</span><span class="card-index">BANK + WALLET</span></div>
+                <label for="realBalance">Actual balance</label>
+                <div class="input-with-prefix"><span>LKR</span><input id="realBalance" type="number" inputmode="decimal"
+                        step="0.01" placeholder="0.00"></div>
+                <div id="statusBox" class="match-status status-empty" role="status" aria-live="polite">Enter your real
+                    balance to compare</div>
+            </article>
+        </section>
+
+        <section class="content-grid">
+            <article class="card form-card">
+                <div class="card-heading"><span>03 / New transaction</span><span id="formModeLabel"
+                        class="card-index expense-text">OUTFLOW</span></div>
+                <div class="type-toggle" role="group" aria-label="Transaction type">
+                    <button class="type-btn active expense" id="btnExpense" type="button" data-type="expense">Expense
+                        <span>-</span></button>
+                    <button class="type-btn income" id="btnIncome" type="button" data-type="income">Income
+                        <span>+</span></button>
+                    <button class="type-btn credit" id="btnCredit" type="button" data-type="credit">Credit
+                        <span>↔</span></button>
+                </div>
+                <form id="transactionForm">
+                    <div class="form-row">
+                        <label>Date<input id="date" type="date" required></label>
+                        <label>Amount<input id="amount" type="number" inputmode="decimal" min="0.01" step="0.01"
+                                placeholder="0.00" required></label>
+                    </div>
+                    <label>Category
+                        <select id="category">
+                            <option>Food &amp; Meals</option>
+                            <option>Home / Rent</option>
+                            <option>Health &amp; Fitness</option>
+                            <option>Bills &amp; Internet</option>
+                            <option>Subscriptions</option>
+                            <option>Transport / Fuel</option>
+                            <option>Transfers / Repayments</option>
+                            <option>Shopping</option>
+                            <option>Other</option>
+                        </select>
+                    </label>
+                    <div id="creditFields" class="credit-fields" hidden>
+                        <p class="form-hint">Credits adjust your cash balance and stay visible as a reminder.</p>
+                        <label>Credit direction
+                            <select id="creditDirection">
+                                <option value="borrowed">Borrowed from a friend</option>
+                                <option value="lent">Lent to a friend</option>
+                            </select>
+                        </label>
+                        <label>Friend or person<input id="person" type="text" maxlength="80"
+                                placeholder="Who is this with?"></label>
+                    </div>
+                    <label>Note<input id="note" type="text" maxlength="120" placeholder="What was this for?"></label>
+                    <button class="primary-btn" id="submitBtn" type="submit">Log expense <span>↗</span></button>
+                </form>
+            </article>
+
+            <article class="card chart-card">
+                <div class="card-heading"><span>04 / Spending map</span><span class="card-index">THIS MONTH</span></div>
+                <div class="chart-wrap"><canvas id="spendingChart" aria-label="Monthly spending by category"></canvas>
+                    <p id="chartEmpty" class="empty-state">Add an expense to see your monthly map.</p>
+                </div>
+            </article>
+        </section>
+
+        <section class="card ledger-card">
+            <div class="ledger-header">
+                <div>
+                    <div class="card-heading"><span>05 / Transaction ledger</span><span id="transactionCount"
+                            class="card-index">0 ITEMS</span></div>
+                    <p class="section-note">Your local ledger, newest first.</p>
+                </div>
+                <div class="data-actions">
+                    <button id="exportJsonBtn" class="utility-btn" type="button">Export JSON</button>
+                    <button id="exportCsvBtn" class="utility-btn" type="button">Export CSV</button>
+                    <button id="importBtn" class="utility-btn" type="button">Import</button>
+                    <input id="importFile" type="file" accept="application/json,.json,.csv,text/csv" hidden>
+                </div>
+            </div>
+            <ul id="transactionList" class="transaction-list"></ul>
+            <p id="listEmpty" class="empty-state">No transactions yet. Your next entry starts the ledger.</p>
+        </section>
+
+        <footer>SMART BALANCE RECONCILER <span>•</span> PRIVATE BY DEFAULT <span>•</span> WORKS OFFLINE</footer>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="storage.js" defer></script>
+    <script src="app.js" defer></script>
+</body>
+
+</html>

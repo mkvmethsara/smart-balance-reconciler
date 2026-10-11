@@ -1,0 +1,18 @@
+{
+  "name": "Smart Balance Reconciler",
+  "short_name": "Smart Balance",
+  "description": "Track transactions and reconcile your bank and wallet balance.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#071018",
+  "theme_color": "#071018",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

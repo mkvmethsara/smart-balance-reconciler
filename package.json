@@ -1,0 +1,40 @@
+{
+  "name": "smart-balance-reconciler",
+  "version": "1.0.0",
+  "description": "Personal finance ledger and balance reconciler",
+  "main": "main.js",
+  "author": "Smart Balance Reconciler",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable nsis"
+  },
+  "devDependencies": {
+    "electron": "^39.1.2",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.smartbalance.reconciler",
+    "productName": "Smart Balance Reconciler",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "index.html",
+      "styles.css",
+      "app.js",
+      "storage.js",
+      "manifest.json",
+      "icon.svg",
+      "main.js"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "icon.svg"
+    }
+  }
+}

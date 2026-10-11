@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Balance Reconciler</title>
+    <meta http-equiv="refresh" content="0; url=index.html">
+    <script>window.location.replace('index.html');</script>
+    <style>
+        :root {
+            --bg: #0a0e17;
+            --surface: #141b2d;
+            --text: #e2e8f0;
+            --glow: #00f3ff;
+            --glow-red: #ff3366;
+            --glow-green: #00ff88;
+            --border: #1e293b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 2rem 1rem;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--glow);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .bal-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .match-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .status-match {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--glow-green);
+            color: var(--glow-green);
+            text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+        }
+
+        .status-short {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--glow-red);
+            color: var(--glow-red);
+            text-shadow: 0 0 8px rgba(255, 51, 102, 0.4);
+        }
+
+        .status-over {
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--glow);
+            color: var(--glow);
+            text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .real-balance-input {
+            border-color: var(--glow);
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--glow);
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--glow);
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.2);
+        }
+
+        button {
+            background-color: transparent;
+            color: var(--glow);
+            font-weight: bold;
+            border: 1px solid var(--glow);
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background-color: var(--glow);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+
+        .type-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .type-btn {
+            flex: 1;
+            margin: 0;
+            border-color: var(--border);
+            color: #8b949e;
+        }
+
+        .type-btn.active.income {
+            border-color: var(--glow-green);
+            color: var(--glow-green);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .type-btn.active.expense {
+            border-color: var(--glow-red);
+            color: var(--glow-red);
+            background: rgba(255, 51, 102, 0.05);
+        }
+
+        .expense-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .expense-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--border);
+        }
+
+        .item-income {
+            border-left-color: var(--glow-green);
+        }
+
+        .item-expense {
+            border-left-color: var(--glow-red);
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: #ff5555;
+            border: none;
+            width: auto;
+            margin: 0;
+            padding: 0 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .delete-btn:hover {
+            box-shadow: none;
+            background: transparent;
+            text-shadow: 0 0 8px rgba(255, 85, 85, 0.6);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Smart Balance Reconciler</h2>
+
+        <!-- Dashboard / Reconciler -->
+        <div class="dashboard">
+            <div class="bal-row">
+                <span>App Calculated Balance:</span>
+                <strong id="appBalanceText">LKR 0.00</strong>
+            </div>
+            <div style="margin: 15px 0;">
+                <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#8b949e;">Enter Actual Balance
+                    (Bank + Wallet):</label>
+                <input type="number" id="realBalance" class="real-balance-input" placeholder="0.00"
+                    oninput="calculateMatch()">
+            </div>
+            <div id="statusBox" class="match-status status-match">Match: Everything is tracked!</div>
+        </div>
+
+        <!-- Input Form -->
+        <div class="type-toggle">
+            <button type="button" class="type-btn active expense" id="btnExpense" onclick="setType('expense')">Expense
+                (-)</button>
+            <button type="button" class="type-btn" id="btnIncome" onclick="setType('income')">Income (+)</button>
+        </div>
+
+        <form id="transactionForm">
+            <input type="date" id="date" required>
+            <input type="number" id="amount" placeholder="Amount (LKR)" required step="0.01">
+            <select id="category">
+                <option value="Food & Meals">Food & Meals</option>
+                <option value="Bodim / Rent">Bodim / Rent</option>
+                <option value="Gym & Health">Gym & Health</option>
+                <option value="Internet / Shared Bills">Internet / Shared Bills</option>
+                <option value="Subscriptions">Subscriptions</option>
+                <option value="Transport / Fuel">Transport / Fuel</option>
+                <option value="Transfers / Repayments">Transfers / Repayments</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Other">Other</option>
+            </select>
+            <input type="text" id="note" placeholder="Short note (e.g., lunch, friend paid back)">
+            <button type="submit" id="submitBtn">Log Expense</button>
+        </form>
+
+        <ul class="expense-list" id="transactionList"></ul>
+    </div>
+
+    <script>
+        let currentType = 'expense';
+        let transactions = JSON.parse(localStorage.getItem('smartTransactions')) || [];
+
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('realBalance').value = localStorage.getItem('savedRealBalance') || '';
+
+        function setType(type) {
+            currentType = type;
+            document.getElementById('btnExpense').classList.toggle('active', type === 'expense');
+            document.getElementById('btnIncome').classList.toggle('active', type === 'income');
+            document.getElementById('submitBtn').innerText = type === 'expense' ? 'Log Expense' : 'Log Income';
+            document.getElementById('submitBtn').style.borderColor = type === 'expense' ? 'var(--glow-red)' : 'var(--glow-green)';
+            document.getElementById('submitBtn').style.color = type === 'expense' ? 'var(--glow-red)' : 'var(--glow-green)';
+        }
+
+        function calculateMatch() {
+            let appBal = 0;
+            transactions.forEach(t => {
+                if (t.type === 'income') appBal += parseFloat(t.amount);
+                else appBal -= parseFloat(t.amount);
+            });
+
+            document.getElementById('appBalanceText').innerText = 'LKR ' + appBal.toFixed(2);
+
+            let realBalInput = document.getElementById('realBalance').value;
+            localStorage.setItem('savedRealBalance', realBalInput);
+
+            let realBal = parseFloat(realBalInput) || 0;
+            let statusBox = document.getElementById('statusBox');
+
+            if (realBalInput === '') {
+                statusBox.className = 'match-status';
+                statusBox.innerText = 'Enter real balance to compare';
+                statusBox.style.background = 'transparent';
+                statusBox.style.border = '1px solid var(--border)';
+                statusBox.style.color = '#8b949e';
+                return;
+            }
+
+            let diff = realBal - appBal;
+
+            if (Math.abs(diff) < 0.1) {
+                statusBox.className = 'match-status status-match';
+                statusBox.innerText = 'Perfect Match! Every rupee tracked.';
+            } else if (diff > 0) {
+                statusBox.className = 'match-status status-over';
+                statusBox.innerText = 'Extra LKR ' + diff.toFixed(2) + ' found! (Did you miss an income?)';
+            } else {
+                statusBox.className = 'match-status status-short';
+                statusBox.innerText = 'Missing LKR ' + Math.abs(diff).toFixed(2) + ' (Did you miss an expense?)';
+            }
+        }
+
+        function updateUI() {
+            const list = document.getElementById('transactionList');
+            list.innerHTML = '';
+
+            transactions.forEach((t, index) => {
+                const li = document.createElement('li');
+                li.className = 'expense-item ' + (t.type === 'income' ? 'item-income' : 'item-expense');
+
+                let sign = t.type === 'income' ? '+' : '-';
+                let color = t.type === 'income' ? 'var(--glow-green)' : 'var(--glow-red)';
+
+                li.innerHTML = `
+                    <div>
+                        <small style="color:#8b949e">${t.date} - ${t.category}</small><br>
+                        ${t.note || (t.type === 'income' ? 'Income' : 'Expense')}
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        <strong style="color:${color}">${sign} ${parseFloat(t.amount).toFixed(2)}</strong>
+                        <button type="button" class="delete-btn" onclick="deleteTransaction(${index})" title="Delete">✕</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+
+            localStorage.setItem('smartTransactions', JSON.stringify(transactions));
+            calculateMatch();
+        }
+
+        document.getElementById('transactionForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const newTx = {
+                type: currentType,
+                date: document.getElementById('date').value,
+                amount: document.getElementById('amount').value,
+                category: document.getElementById('category').value,
+                note: document.getElementById('note').value
+            };
+
+            transactions.unshift(newTx);
+            updateUI();
+
+            document.getElementById('amount').value = '';
+            document.getElementById('note').value = '';
+        });
+
+        function deleteTransaction(index) {
+            transactions.splice(index, 1);
+            updateUI();
+        }
+
+        updateUI();
+    </script>
+</body>
+
+</html>
