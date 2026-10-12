@@ -50,6 +50,8 @@ function getSummary() {
     const amount = Number(transaction.amount) || 0;
     if (transaction.kind === 'credit' && transaction.direction === 'borrowed') summary.borrowed += amount;
     else if (transaction.kind === 'credit' && transaction.direction === 'lent') summary.lent += amount;
+    else if (transaction.kind === 'credit' && transaction.direction === 'borrowed-repayment') summary.borrowed -= amount;
+    else if (transaction.kind === 'credit' && transaction.direction === 'lent-repayment') summary.lent -= amount;
     else if (transaction.type === 'income') summary.income += amount;
     else summary.expenses += amount;
     return summary;
@@ -84,10 +86,12 @@ function renderTransactions() {
     const isIncome = transaction.type === 'income';
     const isCredit = transaction.kind === 'credit';
     const label = isCredit
-      ? (transaction.direction === 'borrowed' ? 'Borrowed' : 'Lent')
+      ? ({ borrowed: 'Borrowed', lent: 'Lent', 'lent-repayment': 'Repayment received', 'borrowed-repayment': 'Repayment made' }[transaction.direction] || 'Credit')
       : (isIncome ? 'Income' : 'Expense');
     const itemClass = isCredit ? 'item-credit' : (isIncome ? 'item-income' : 'item-expense');
-    const sign = isCredit && transaction.direction === 'lent' || !isCredit && !isIncome ? '-' : '+';
+    const sign = isCredit
+      ? (transaction.direction === 'lent' || transaction.direction === 'borrowed-repayment' ? '-' : '+')
+      : (!isIncome ? '-' : '+');
     const person = isCredit && transaction.person ? ` / ${escapeHtml(transaction.person)}` : '';
     return `<li class="transaction-item ${itemClass}">
       <div class="transaction-main"><div class="transaction-note">${escapeHtml(transaction.note || label)}</div>
@@ -173,7 +177,7 @@ async function importData(file) {
   if (!Array.isArray(data.transactions)) throw new Error('The backup does not contain a transaction list.');
   state.transactions = data.transactions.filter(transaction => {
     const validType = ['income', 'expense'].includes(transaction.type);
-    const validCredit = transaction.kind === 'credit' && ['borrowed', 'lent'].includes(transaction.direction);
+    const validCredit = transaction.kind === 'credit' && ['borrowed', 'lent', 'lent-repayment', 'borrowed-repayment'].includes(transaction.direction);
     return (validType || validCredit) && Number(transaction.amount) >= 0;
   }).map(transaction => ({ ...transaction, amount: Number(transaction.amount) }));
   if (typeof data.realBalance === 'string' || typeof data.realBalance === 'number') state.realBalance = String(data.realBalance);
@@ -186,7 +190,7 @@ elements.form.addEventListener('submit', event => {
   event.preventDefault();
   const isCredit = state.currentType === 'credit';
   state.transactions.unshift({
-    type: isCredit && elements.creditDirection.value === 'borrowed' ? 'income' : isCredit ? 'expense' : state.currentType,
+    type: isCredit && ['borrowed', 'lent-repayment'].includes(elements.creditDirection.value) ? 'income' : isCredit ? 'expense' : state.currentType,
     ...(isCredit ? { kind: 'credit', direction: elements.creditDirection.value, person: elements.person.value.trim() } : {}),
     date: elements.date.value,
     amount: Number(elements.amount.value),

@@ -5,6 +5,7 @@ Smart Balance Reconciler is a privacy-first personal finance ledger for tracking
 ## Features
 
 - Track income, expenses, borrowed money, and money lent to friends
+- Record repayments from friends or repayments made to friends, reducing the outstanding amount
 - Reconcile the calculated balance against your real balance
 - View monthly spending by category
 - Local ledger with newest transactions first
